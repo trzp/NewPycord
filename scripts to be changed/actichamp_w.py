@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+#improved the program to enable the software stablely run.
+#by mrtang on 2016.6.17
+#email:mrtang@nudt.edu.cn
+
 '''
 Python wrapper for ActiChamp Windows library
 
@@ -457,6 +461,7 @@ class ActiChamp(object):
         '''
         # get OS architecture (32/64-bit)
         self.x64 = ("64" in platform.architecture()[0])
+        # self.x64 = True
         
         # set default values
         self.devicehandle = 0
@@ -504,20 +509,22 @@ class ActiChamp(object):
         if self.ampversion.DLL() != CHAMP_VERSION:
             raise AmpError("wrong ActiChamp DLL version (%X / %X)"%(self.ampversion.DLL(),
                                                                     CHAMP_VERSION))
-            
         
+        # ignoring these code by mrtang
+        #========================================================================
         # try to open device and get device properties
-        try:
-            # get hardware properties
-            self.open()
-            self.getDeviceInfo()
-        except:
-            pass
+        # try:
+            # # get hardware properties
+            # self.open()
+            # self.getDeviceInfo()
+        # except:
+            # pass
 
-        try:
-            self.close()
-        except:
-            pass
+        # try:
+            # self.close()
+        # except:
+            # pass
+        #=========================================================================
         
     def _resetDeviceProperties(self):
         ''' Set channel count to zero
@@ -538,10 +545,10 @@ class ActiChamp(object):
                 _ctypes.FreeLibrary(self.lib._handle) 
             # load/reload library    
             if self.x64:
-                self.lib = ctypes.windll.LoadLibrary("ActiChamp_x64.dll")
+                self.lib = ctypes.WinDLL('ActiChamp_x64.dll')
                 self.lib.champOpen.restype = ctypes.c_uint64
             else:
-                self.lib = ctypes.windll.LoadLibrary("ActiChamp_x86.dll")
+                self.lib = ctypes.WinDLL('ActiChamp_x86.dll')
         except:
             self.lib = None
             if self.x64:
@@ -562,33 +569,21 @@ class ActiChamp(object):
         self._resetDeviceProperties()
         if self.lib.champGetCount() == 0:
             raise AmpError("hardware not available")
-        
-        retry = 3
-        while retry > 0:
-            # open the first available device
+
+        #==== new by mrtang ====================================================
+        # trying to open device until success
+        print 'trying to open device...'
+        while True:
+            self.loadLib()
             if self.x64:
                 self.devicehandle = ctypes.c_uint64(self.lib.champOpen(0))
             else:
                 self.devicehandle = ctypes.c_int32(self.lib.champOpen(0))
-            if self.devicehandle.value == 0:
-                self.devicehandle = 0
-                raise AmpError("failed to open device")
-            
-            # get device version info
-            err = self.ampversion.read(self.lib, self.devicehandle)
-            if err != CHAMP_ERR_OK:
-                self.close()
-                raise AmpError("failed to get device version info", err)
-            
-            # check if fpga loaded successfully
-            if not self.ampversion.isFpgaProgrammed():
-                self.lib.champClose(self.devicehandle)
-                self.devicehandle = 0
-                retry -= 1
-                if retry == 0:
-                    raise AmpError("failed to open device")
-            else:
-                retry = 0
+
+            if self.devicehandle.value != 0:   break
+            time.sleep(0.5)
+        print 'actichamp opened!!!'
+        #=======================================================================
 
         # get device module connection info
         self.modulestate.Enabled = 0
@@ -886,6 +881,9 @@ class ActiChamp(object):
         d.append(eeg)
         d.append(trg)
         d.append(sct)
+
+        # by mrtang
+        marker = np.int32(np.bitwise_and(trg[0], 0x00FF))
         return d, disconnected
         
     def readImpedances(self):
