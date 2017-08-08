@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+#updated by mrtang 2017.8.8
+#added function: 
+#the new program write EEG data into a shared memory named '__eeg_from_pycorder__'.
+#so that other program could get data from this memory.
+
 '''
 Main Application
 
@@ -143,6 +148,13 @@ from modbase import *
 #from tutorial.tut_3 import TUT_3
 #from tutorial.tut_4 import TUT_4
 
+import mmap
+class sh:   #by mrtang
+    '''
+    interacte between amplifier module and filter modeuls
+    '''
+    sharemem = None
+    eegchs = 0
 
 def InstantiateModules(run_as):
     ''' Instantiate and arrange module objects. 
@@ -151,6 +163,9 @@ def InstantiateModules(run_as):
     @param run_as: command line option (-r, --runas) for different module configurations 
     @return: list with instantiated module objects 
     '''
+    
+    shm = sh()
+    
     # get command line arguments
     if 'RC' in run_as:
         # run as remote client
@@ -161,13 +176,13 @@ def InstantiateModules(run_as):
                    DISP_Scope(instance=0)]
     else:
         # run as actiCHamp recorder
-        modules = [AMP_ActiChamp(),
+        modules = [AMP_ActiChamp(shm),
                    MNT_Recording(),
                    TRG_Eeg(),
                    StorageVision(), 
-                   FLT_Eeg(), 
+                   FLT_Eeg(shm), 
                    #TUT_0(),
-                   RDA_Server(),
+                   #RDA_Server(),
                    IMP_Display(), 
                    DISP_Scope(instance=0)
                    ]

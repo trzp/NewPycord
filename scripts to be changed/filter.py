@@ -1,3 +1,7 @@
+#updated by mrtang 2017.8.8
+#this script write EEG data into a shared memory named '__eeg_from_pycorder__'.
+#so that other program could get data from this memory.
+
 '''
 Digital Filter Module
 
@@ -35,15 +39,18 @@ from scipy import signal
 from modbase import *
 from res import frmFilterConfig
 from operator import itemgetter
+import struct
 
 class FLT_Eeg(ModuleBase):
     ''' Low, high pass and notch filter
     '''
 
-    def __init__(self, *args, **keys):
+    def __init__(self,sh, *args, **keys):
         ''' Constructor
         '''
         ModuleBase.__init__(self, name="EEG Filter", **keys)
+        
+        self.shm = sh
 
         # XML parameter version
         # 1: initial version
@@ -93,6 +100,8 @@ class FLT_Eeg(ModuleBase):
         @param slice: channel group indices
         @return: filter parameters and state vector
         '''
+        self.shm.eegchs=slice.stop
+       
         if (frequency == 0.0) or (frequency > self.samplefreq/2.0):
             return None
         if type == "bandstop":
@@ -234,14 +243,19 @@ class FLT_Eeg(ModuleBase):
         for flt in self.notchFilter:
             self.data.eeg_channels[flt['slice']],flt['zi'] = \
                 signal.lfilter(flt['b'], flt['a'], 
-                               self.data.eeg_channels[flt['slice']], zi=flt['zi'])
-            
+                               self.data.eeg_channels[flt['slice']], zi=flt['zi'])           
             
     
     def process_output(self):
         if not self.dataavailable:
             return None
         self.dataavailable = False
+        
+        buf = ''.join([struct.pack('i',item) for channel in self.data.eeg_channels for item in channel])
+        self.shm.sharemem.seek(0)
+        self.shm.sharemem.write('y')
+        self.shm.sharemem.seek(16)
+        self.shm.sharemem.write(buf)
         return self.data
 
     def getXML(self):

@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+#updated by mrtang 2017.8.8
+#added function: 
+#the new program write EEG data into a shared memory named '__eeg_from_pycorder__'.
+#so that other program could get data from this memory.
+
+
 '''
 Acquisition Module
 
@@ -28,7 +34,7 @@ along with PyCorder. If not, see <http://www.gnu.org/licenses/>.
 @author: Norbert Hauser
 @version: 1.0
 '''
-
+import mmap,time,struct
 from scipy import signal
 from PyQt4 import Qt
 from modbase import *
@@ -61,10 +67,12 @@ class AMP_ActiChamp(ModuleBase):
     ''' ActiChamp EEG amplifier module 
     '''
 
-    def __init__(self, *args, **keys):
+    def __init__(self,sh,*args, **keys):
         ''' Constructor
         '''
         ModuleBase.__init__(self, name="Amplifier", **keys)
+        
+        self.shm = sh
 
         # XML parameter version
         # 1: initial version
@@ -322,6 +330,7 @@ class AMP_ActiChamp(ModuleBase):
     def process_start(self):
         ''' Open amplifier hardware and start data acquisition
         '''
+        
         # reset variables
         self.eeg_data.sample_counter = 0
         self.acquisitionTimeoutCounter = 0
@@ -379,6 +388,18 @@ class AMP_ActiChamp(ModuleBase):
         self.blocking_counter = 0
         self.initialErrorCount = -1 
         
+        #by mrtang
+        time.sleep(0.5)
+        samplerate = self.eeg_data.sample_rate
+        pnum = samplerate/20
+        cnum = self.shm.eegchs
+        bytesnum = int(13+(cnum*pnum)*8)
+
+        self.shm.sharemem = mmap.mmap(0,bytesnum,access=mmap.ACCESS_READ|mmap.ACCESS_WRITE,tagname='__eeg_from_pycorder__')
+        head = 'n'+''.join([struct.pack('i',item) for item in [samplerate,cnum,pnum]])
+        self.shm.sharemem.seek(0)
+        self.shm.sharemem.write(head)
+        time.sleep(0.2)
         
     def process_stop(self):
         ''' Stop data acquisition and close hardware object
