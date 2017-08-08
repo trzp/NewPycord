@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-#improved the program to enable the software stablely run.
-#by mrtang on 2016.6.17
-#email:mrtang@nudt.edu.cn
-
 '''
 Python wrapper for ActiChamp Windows library
 
@@ -32,6 +27,12 @@ along with PyCorder. If not, see <http://www.gnu.org/licenses/>.
 
 @author: Norbert Hauser
 @version: 1.0
+'''
+
+'''
+improved the program to enable the software stablely run.
+by mrtang on 2016.6.17
+email:mrtang@nudt.edu.cn
 '''
 
 import ctypes

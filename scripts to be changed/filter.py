@@ -1,7 +1,3 @@
-#updated by mrtang 2017.8.8
-#this script write EEG data into a shared memory named '__eeg_from_pycorder__'.
-#so that other program could get data from this memory.
-
 '''
 Digital Filter Module
 
@@ -33,6 +29,14 @@ along with PyCorder. If not, see <http://www.gnu.org/licenses/>.
 @version: 1.0
 
 B{Revision:} $LastChangedRevision: 197 $
+'''
+
+'''
+updated by mrtang 2017.8.8
+added function: 
+    the new program write EEG data into a shared memory named 
+    '__eeg_from_pycorder__' so that other program could get data
+    from this memory.
 '''
 
 from scipy import signal

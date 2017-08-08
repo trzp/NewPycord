@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-#updated by mrtang 2017.8.8
-#added function: 
-#the new program write EEG data into a shared memory named '__eeg_from_pycorder__'.
-#so that other program could get data from this memory.
-
-
 '''
 Acquisition Module
 
@@ -34,6 +27,17 @@ along with PyCorder. If not, see <http://www.gnu.org/licenses/>.
 @author: Norbert Hauser
 @version: 1.0
 '''
+
+'''
+updated by mrtang 2017.8.8
+added function: 
+    the new program write EEG data into a shared memory named 
+    '__eeg_from_pycorder__' so that other program could get data
+    from this memory.
+'''
+
+
+
 import mmap,time,struct
 from scipy import signal
 from PyQt4 import Qt

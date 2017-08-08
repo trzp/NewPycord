@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-#updated by mrtang 2017.8.8
-#added function: 
-#the new program write EEG data into a shared memory named '__eeg_from_pycorder__'.
-#so that other program could get data from this memory.
-
 '''
 Main Application
 
@@ -57,6 +51,14 @@ B{Dependencies:}
 
 @author: Norbert Hauser
 @version: 1.0
+'''
+
+'''
+updated by mrtang 2017.8.8
+added function: 
+    the new program write EEG data into a shared memory named 
+    '__eeg_from_pycorder__' so that other program could get data
+    from this memory.
 '''
 
 __version__ = "1.0.8"
