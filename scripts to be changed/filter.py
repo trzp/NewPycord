@@ -251,7 +251,7 @@ class FLT_Eeg(ModuleBase):
             return None
         self.dataavailable = False
         
-        buf = ''.join([struct.pack('i',item) for channel in self.data.eeg_channels for item in channel])
+        buf = ''.join([struct.pack('d',item) for channel in self.data.eeg_channels for item in channel])
         self.shm.sharemem.seek(0)
         self.shm.sharemem.write('y')
         self.shm.sharemem.seek(16)
